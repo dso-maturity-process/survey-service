@@ -1,5 +1,5 @@
 # SurveyTemplates
-insert into surveytemplate(id, name, description) values(10001, 'Veterans Administration - DSO', 'Primary survey for the VA');
+insert into surveytemplate(id, name, description) values(10001, 'VeteransAdministration-DSO', 'Primary survey for the VA');
 insert into surveytemplate(id, name, description) values(10002, 'NIH - DSO', 'Specialized for health domain');
 
 # Questions
