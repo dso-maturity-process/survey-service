@@ -33,6 +33,7 @@ import com.governmentcio.dmp.Application;
 import com.governmentcio.dmp.dao.QuestionTemplateDao;
 import com.governmentcio.dmp.model.QuestionTemplate;
 import com.governmentcio.dmp.model.SurveyTemplate;
+import com.governmentcio.dmp.utility.ServiceHealth;
 
 /**
  * 
@@ -280,12 +281,20 @@ class SurveyServiceControllerTests {
 
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
 
-		ResponseEntity<String> response = restTemplate.exchange(
-				createURLWithPort("/healthz"), HttpMethod.POST, entity, String.class);
+		ResponseEntity<ServiceHealth> response = restTemplate.exchange(
+				createURLWithPort("/healthz"), HttpMethod.GET, entity,
+				new ParameterizedTypeReference<ServiceHealth>() {
+				});
 
 		assertNotNull(response);
 
 		assertTrue(response.getStatusCode() == HttpStatus.OK);
+
+		ServiceHealth srvHealth = response.getBody();
+
+		assertNotNull(srvHealth);
+
+		assertTrue(srvHealth.isHealthy());
 	}
 
 	/**

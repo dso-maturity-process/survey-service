@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.4.1</version>
+		<version>2.2.1.RELEASE</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.governmentcio.dmp</groupId>
@@ -36,6 +36,7 @@
 		<maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>
 		<maven-site-plugin.version>3.6</maven-site-plugin.version>
 		<wagon-ssh.version>3.2.0</wagon-ssh.version>
+		<spring-cloud-contract.version>3.0.0</spring-cloud-contract.version>
 
 		<!-- Checkstyle standards location -->
 
@@ -63,6 +64,9 @@
 
 		<!-- DAO model -->
 		<doa.version>0.0.1-SNAPSHOT</doa.version>
+
+		<spring-cloud.version>Greenwich.SR1</spring-cloud.version>
+		<spring-cloud-contract.version>2.1.1.RELEASE</spring-cloud-contract.version>
 
 	</properties>
 
@@ -216,6 +220,15 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-contract-verifier</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/junit/junit -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -234,12 +247,63 @@
 			<artifactId>dao</artifactId>
 			<version>${doa.version}</version>
 		</dependency>
-
+		<dependency>
+			<groupId>io.rest-assured</groupId>
+			<artifactId>spring-mock-mvc</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+		</dependency>
 	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<!-- Build -->
 
 	<build>
+
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.springframework.cloud</groupId>
+										<artifactId>spring-cloud-contract-maven-plugin</artifactId>
+										<versionRange>[1.0,)</versionRange>
+										<goals>
+											<goal>convert</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 
 		<defaultGoal>install</defaultGoal>
 
@@ -255,6 +319,7 @@
 		</resources>
 
 		<plugins>
+
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -490,6 +555,17 @@
 				</executions>
 			</plugin>
 
+			<!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-contract-maven-plugin -->
+			<plugin>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-contract-maven-plugin</artifactId>
+				<version>${spring-cloud-contract.version}</version>
+				<extensions>true</extensions>
+				<configuration>
+					<baseClassForTests>com.governmentcio.dmp.surveyservice.BaseClass</baseClassForTests>
+				</configuration>
+			</plugin>
+
 			<!-- http://maven.apache.org/surefire/maven-failsafe-plugin - integration 
 				tests -->
 			<plugin>
@@ -522,7 +598,6 @@
 			<plugin>
 				<artifactId>exec-maven-plugin</artifactId>
 				<groupId>org.codehaus.mojo</groupId>
-				<version>${exec-maven-plugin.version}</version>
 				<executions>
 					<execution>
 						<id>Build Docker image</id>
@@ -593,7 +668,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
-				<version>${maven-site-plugin.version}</version>
 				<configuration>
 					<port>80</port>
 				</configuration>
