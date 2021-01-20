@@ -102,6 +102,17 @@ public class SurveyServiceImpl implements SurveyService {
 		return surveyTemplate;
 	}
 
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
+	@Override
+	public SurveyTemplate getSurveyTemplateById(final Long id) {
+		return DomainFactory
+				.createSurveyTemplate(surveyTemplateRepository.findById(id).get());
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -290,7 +301,7 @@ public class SurveyServiceImpl implements SurveyService {
 
 		if (!retrievedQuestionDao.isPresent()) {
 			throw new SurveyServiceException(
-					"Question not found for update usind id [" + id + "]");
+					"Question not found for update using id [" + id + "]");
 		}
 
 		questionTemplateRepository.delete(retrievedQuestionDao.get());

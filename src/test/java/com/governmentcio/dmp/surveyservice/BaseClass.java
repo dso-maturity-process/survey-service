@@ -1,5 +1,8 @@
 package com.governmentcio.dmp.surveyservice;
 
+import org.apache.http.entity.ContentType;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -9,6 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.governmentcio.dmp.Application;
+import com.governmentcio.dmp.exception.SurveyServiceException;
 import com.governmentcio.dmp.model.QuestionTemplate;
 import com.governmentcio.dmp.model.SurveyTemplate;
 import com.governmentcio.dmp.surveyservice.controller.SurveyServiceController;
@@ -27,7 +31,7 @@ public abstract class BaseClass {
 	SurveyService surveyService;
 
 	@Before
-	public void setup() {
+	public void setup() throws SurveyServiceException {
 		RestAssuredMockMvc.standaloneSetup(surveyServiceController);
 
 		SurveyTemplate surveyTemplate = new SurveyTemplate(10001L,
@@ -45,10 +49,19 @@ public abstract class BaseClass {
 
 		surveyTemplate.getQuestionTemplates().add(questionTemplate);
 
+		Mockito.when(surveyServiceController.getSurveyTemplateById(10001L))
+				.thenReturn(surveyTemplate);
+
 		Mockito
 				.when(surveyServiceController
 						.getSurveyTemplateByName("VeteransAdministration-DSO"))
 				.thenReturn(surveyTemplate);
+
+		Mockito.doAnswer((i) -> {
+			return new BasicHeader(HTTP.CONTENT_TYPE,
+					ContentType.APPLICATION_JSON.toString());
+		}).when(surveyService).removeQuestionTemplate(10001L);
+
 	}
 
 }

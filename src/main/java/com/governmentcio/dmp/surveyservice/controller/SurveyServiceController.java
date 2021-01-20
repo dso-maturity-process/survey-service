@@ -88,6 +88,16 @@ public class SurveyServiceController {
 
 	/**
 	 * 
+	 * @param id
+	 * @return
+	 */
+	@GetMapping("/getSurveyTemplateById/{id}")
+	public SurveyTemplate getSurveyTemplateById(@PathVariable Long id) {
+		return surveyService.getSurveyTemplateById(id);
+	}
+
+	/**
+	 * 
 	 * @param user
 	 * @throws Exception
 	 */

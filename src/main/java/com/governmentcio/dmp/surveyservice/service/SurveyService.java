@@ -28,6 +28,13 @@ public interface SurveyService {
 
 	/**
 	 * 
+	 * @param id
+	 * @return
+	 */
+	SurveyTemplate getSurveyTemplateById(Long id);
+
+	/**
+	 * 
 	 * @param user
 	 * @throws Exception
 	 */

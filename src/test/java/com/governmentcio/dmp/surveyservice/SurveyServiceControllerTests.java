@@ -76,6 +76,67 @@ class SurveyServiceControllerTests {
 	 * 
 	 */
 	@Test
+	public void test_getSurveyTemplate_by_ID() {
+
+		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+
+		String name = "Test Template for GetByID";
+		String description = "Testing only";
+
+		String parameters = "?name=" + name + "&description=" + description;
+
+		ResponseEntity<SurveyTemplate> response = restTemplate.exchange(
+				createURLWithPort("/addSurveyTemplate" + parameters), HttpMethod.POST,
+				entity, new ParameterizedTypeReference<SurveyTemplate>() {
+				});
+
+		assertNotNull(response);
+
+		assertTrue(response.getStatusCode() == HttpStatus.OK);
+
+		SurveyTemplate surveyTemplate = response.getBody();
+
+		assertNotNull(surveyTemplate);
+
+		assertTrue(surveyTemplate.getName().equals(name));
+		assertTrue(surveyTemplate.getDescription().equals(description));
+
+		// Get the SurveyTemplate just added
+
+		response = restTemplate.exchange(
+				createURLWithPort("/getSurveyTemplateById/" + surveyTemplate.getId()),
+				HttpMethod.GET, entity,
+				new ParameterizedTypeReference<SurveyTemplate>() {
+				});
+
+		assertNotNull(response);
+
+		assertTrue(response.getStatusCode() == HttpStatus.OK);
+
+		surveyTemplate = response.getBody();
+
+		assertNotNull(surveyTemplate);
+
+		assertTrue(surveyTemplate.getName().equals(name));
+		assertTrue(surveyTemplate.getDescription().equals(description));
+
+		// Remove the Survey template
+
+		ResponseEntity<Void> responseVoid = restTemplate.exchange(
+				createURLWithPort("/removeSurveyTemplate/" + surveyTemplate.getName()),
+				HttpMethod.DELETE, entity, new ParameterizedTypeReference<Void>() {
+				});
+
+		assertNotNull(responseVoid);
+
+		assertTrue(responseVoid.getStatusCode() == HttpStatus.OK);
+
+	}
+
+	/**
+	 * 
+	 */
+	@Test
 	public void test_SurveyTemplate_CRUD_Functionality() {
 
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
