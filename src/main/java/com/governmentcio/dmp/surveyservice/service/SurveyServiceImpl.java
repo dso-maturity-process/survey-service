@@ -17,10 +17,12 @@ import org.springframework.stereotype.Service;
 import com.governmentcio.dmp.dao.DomainFactory;
 import com.governmentcio.dmp.dao.QuestionTemplateDao;
 import com.governmentcio.dmp.dao.SurveyTemplateDao;
+import com.governmentcio.dmp.dao.SurveyTemplateQuestionTemplateDao;
 import com.governmentcio.dmp.exception.SurveyServiceException;
 import com.governmentcio.dmp.model.QuestionTemplate;
 import com.governmentcio.dmp.model.SurveyTemplate;
 import com.governmentcio.dmp.repository.QuestionTemplateRepository;
+import com.governmentcio.dmp.repository.SurveyTemplateQuestionTemplateRepository;
 import com.governmentcio.dmp.repository.SurveyTemplateRepository;
 
 /**
@@ -42,6 +44,9 @@ public class SurveyServiceImpl implements SurveyService {
 
 	@Autowired
 	QuestionTemplateRepository questionTemplateRepository;
+
+	@Autowired
+	SurveyTemplateQuestionTemplateRepository surveyTemplateQuestionTemplateRepository;
 
 	/*
 	 * (non-Javadoc)
@@ -308,4 +313,55 @@ public class SurveyServiceImpl implements SurveyService {
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.governmentcio.dmp.surveyservice.service.SurveyService#
+	 * addQuestionTemplateToSurveyTemplate(java.lang.Long, java.lang.Long)
+	 */
+	@Override
+	public void addQuestionTemplateToSurveyTemplate(final Long questionTemplateId,
+			final Long surveyTemplateId, final Long sequence)
+			throws SurveyServiceException {
+
+		Optional<
+				SurveyTemplateDao> surveyTemplateOptional = surveyTemplateRepository
+						.findById(surveyTemplateId);
+
+		if (!surveyTemplateOptional.isPresent()) {
+			throw new SurveyServiceException(
+					"Unable to find SurveyTemplate using id [" + surveyTemplateId + "]");
+		}
+
+		Optional<QuestionTemplateDao> questionOptional = questionTemplateRepository
+				.findById(questionTemplateId);
+
+		if (!questionOptional.isPresent()) {
+			throw new SurveyServiceException(
+					"Unable to find QuestionTemplate using id [" + questionTemplateId
+							+ "]");
+		}
+
+		QuestionTemplateDao questionTemplateDao = questionOptional.get();
+		SurveyTemplateDao surveyTemplateDao = surveyTemplateOptional.get();
+
+		SurveyTemplateQuestionTemplateDao surveyTemplateQuestionTemplateDao = new SurveyTemplateQuestionTemplateDao(
+				surveyTemplateDao, questionTemplateDao);
+
+		surveyTemplateQuestionTemplateDao.setSequence(sequence);
+
+		surveyTemplateQuestionTemplateRepository
+				.save(surveyTemplateQuestionTemplateDao);
+
+		surveyTemplateDao.getSurveyTemplateQuestionTemplateDaos()
+				.add(surveyTemplateQuestionTemplateDao);
+
+		surveyTemplateRepository.save(surveyTemplateDao);
+
+		questionTemplateDao.getSurveyTemplateQuestionTemplateDaos()
+				.add(surveyTemplateQuestionTemplateDao);
+		
+		questionTemplateRepository.save(questionTemplateDao);
+
+	}
 }

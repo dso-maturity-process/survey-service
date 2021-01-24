@@ -179,6 +179,24 @@ public class SurveyServiceController {
 
 	/**
 	 * 
+	 * @param questionTemplateId
+	 * @param surveyTemplateId
+	 * @param sequence
+	 * @throws SurveyServiceException
+	 */
+	@RequestMapping(value = "/addQuestionTemplateToSurveyTemplate", method = RequestMethod.POST)
+	public void addQuestionTemplateToSurveyTemplate(
+			@RequestParam(value = "questionTemplateId", required = true) Long questionTemplateId,
+			@RequestParam(value = "surveyTemplateId", required = true) Long surveyTemplateId,
+			@RequestParam(value = "sequence", required = true) Long sequence
+
+	) throws SurveyServiceException {
+		surveyService.addQuestionTemplateToSurveyTemplate(questionTemplateId,
+				surveyTemplateId, sequence);
+	}
+
+	/**
+	 * 
 	 * @param name
 	 * @return
 	 */
