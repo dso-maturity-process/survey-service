@@ -1,6 +1,8 @@
 
 package com.governmentcio.dmp.surveyservice;
 
+import static org.junit.Assert.assertFalse;
+
 /**
  * 
  *  @author <a href=mailto:support@governmentcio.com>support</a>
@@ -13,6 +15,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
@@ -356,6 +359,134 @@ class SurveyServiceControllerTests {
 		assertNotNull(srvHealth);
 
 		assertTrue(srvHealth.isHealthy());
+	}
+
+	/**
+	 * 
+	 */
+	@Test
+	public void test_Adding_QuestionTemplates_to_SurveyTemplate() {
+
+		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+
+		String name = "Survey with Questions";
+		String description = "Testing adding question template to a survey template";
+
+		String parameters = "?name=" + name + "&description=" + description;
+
+		ResponseEntity<SurveyTemplate> surveyTemplateResponse = restTemplate
+				.exchange(createURLWithPort("/addSurveyTemplate" + parameters),
+						HttpMethod.POST, entity,
+						new ParameterizedTypeReference<SurveyTemplate>() {
+						});
+
+		assertNotNull(surveyTemplateResponse);
+
+		assertTrue(surveyTemplateResponse.getStatusCode() == HttpStatus.OK);
+
+		SurveyTemplate surveyTemplate = surveyTemplateResponse.getBody();
+
+		assertNotNull(surveyTemplate);
+
+		assertTrue(surveyTemplate.getName().equals(name));
+		assertTrue(surveyTemplate.getDescription().equals(description));
+
+		// Create a new question template
+
+		String text = "Test Question 101";
+		parameters = "?text=" + text;
+
+		ResponseEntity<QuestionTemplate> questionTemplateResponse = restTemplate
+				.exchange(createURLWithPort("/addQuestionTemplate" + parameters),
+						HttpMethod.POST, entity,
+						new ParameterizedTypeReference<QuestionTemplate>() {
+						});
+
+		assertNotNull(questionTemplateResponse);
+
+		assertTrue(questionTemplateResponse.getStatusCode() == HttpStatus.OK);
+
+		QuestionTemplate newQuestionTemplate = questionTemplateResponse.getBody();
+
+		assertNotNull(newQuestionTemplate);
+
+		assertTrue(newQuestionTemplate.getText().equals(text));
+
+		/**
+		 * Add QuestionTemplate to SurveyTemplate
+		 */
+
+		parameters = "?questionTemplateId=" + newQuestionTemplate.getId()
+				+ "&surveyTemplateId=" + surveyTemplate.getId() + "&sequence=" + 1L;
+
+		ResponseEntity<Void> responseVoid = restTemplate.exchange(
+				createURLWithPort("/addQuestionTemplateToSurveyTemplate" + parameters),
+				HttpMethod.POST, entity, new ParameterizedTypeReference<Void>() {
+				});
+
+		assertNotNull(responseVoid);
+
+		assertTrue(responseVoid.getStatusCode() == HttpStatus.OK);
+
+		// Create a second question template
+
+		text = "Test Question 102";
+		parameters = "?text=" + text;
+
+		questionTemplateResponse = restTemplate.exchange(
+				createURLWithPort("/addQuestionTemplate" + parameters), HttpMethod.POST,
+				entity, new ParameterizedTypeReference<QuestionTemplate>() {
+				});
+
+		assertNotNull(questionTemplateResponse);
+
+		assertTrue(questionTemplateResponse.getStatusCode() == HttpStatus.OK);
+
+		newQuestionTemplate = questionTemplateResponse.getBody();
+
+		assertNotNull(newQuestionTemplate);
+
+		assertTrue(newQuestionTemplate.getText().equals(text));
+
+		/**
+		 * Add a second QuestionTemplate
+		 */
+		parameters = "?questionTemplateId=" + newQuestionTemplate.getId()
+				+ "&surveyTemplateId=" + surveyTemplate.getId() + "&sequence=" + 2L;
+
+		responseVoid = restTemplate.exchange(
+				createURLWithPort("/addQuestionTemplateToSurveyTemplate" + parameters),
+				HttpMethod.POST, entity, new ParameterizedTypeReference<Void>() {
+				});
+
+		assertNotNull(responseVoid);
+
+		assertTrue(responseVoid.getStatusCode() == HttpStatus.OK);
+
+		// Get the SurveyTemplate with QuestionTemplates added
+
+		surveyTemplateResponse = restTemplate.exchange(
+				createURLWithPort("/getSurveyTemplate/" + surveyTemplate.getName()),
+				HttpMethod.GET, entity,
+				new ParameterizedTypeReference<SurveyTemplate>() {
+				});
+
+		assertNotNull(surveyTemplateResponse);
+
+		assertTrue(surveyTemplateResponse.getStatusCode() == HttpStatus.OK);
+
+		surveyTemplate = surveyTemplateResponse.getBody();
+
+		assertNotNull(surveyTemplate);
+
+		assertTrue(surveyTemplate.getName().equals(name));
+		assertTrue(surveyTemplate.getDescription().equals(description));
+
+		Set<QuestionTemplate> questionTemplates = surveyTemplate
+				.getQuestionTemplates();
+
+		assertFalse(questionTemplates.isEmpty());
+
 	}
 
 	/**

@@ -82,4 +82,15 @@ public interface SurveyService {
 	 */
 	void removeQuestionTemplate(Long id) throws SurveyServiceException;
 
+	/**
+	 * 
+	 * @param questionTemplateId
+	 * @param surveyTemplateId
+	 * @param sequence
+	 * @throws SurveyServiceException
+	 */
+	void addQuestionTemplateToSurveyTemplate(final Long questionTemplateId,
+			final Long surveyTemplateId, final Long sequence)
+			throws SurveyServiceException;
+
 }
