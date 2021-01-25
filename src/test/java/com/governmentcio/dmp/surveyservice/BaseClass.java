@@ -41,11 +41,13 @@ public abstract class BaseClass {
 
 		QuestionTemplate questionTemplate = new QuestionTemplate(20001L,
 				"Text for the first question");
+		questionTemplate.setSequence(1L);
 
 		surveyTemplate.getQuestionTemplates().add(questionTemplate);
 
 		questionTemplate = new QuestionTemplate(20002L,
 				"Text for the second question");
+		questionTemplate.setSequence(2L);
 
 		surveyTemplate.getQuestionTemplates().add(questionTemplate);
 
