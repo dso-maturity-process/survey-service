@@ -46,7 +46,7 @@ import com.governmentcio.dmp.utility.ServiceHealth;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class SurveyServiceControllerTests {
+class SurveyServiceControllerTest {
 
 	@LocalServerPort
 	private int port;

@@ -1,5 +1,6 @@
 package com.governmentcio.dmp.surveyservice.service;
 
+import com.governmentcio.dmp.dao.SurveyTemplateQuestionTemplateDao;
 import com.governmentcio.dmp.exception.SurveyServiceException;
 import com.governmentcio.dmp.model.QuestionTemplate;
 import com.governmentcio.dmp.model.SurveyTemplate;
@@ -11,6 +12,13 @@ public interface SurveyService {
 	 * @return
 	 */
 	Iterable<SurveyTemplate> getSurveyTemplates();
+
+	/**
+	 * 
+	 * @return
+	 */
+	Iterable<
+			SurveyTemplateQuestionTemplateDao> getSurveytemplateQuestiontemplateAssociations();
 
 	/**
 	 * 
@@ -92,5 +100,14 @@ public interface SurveyService {
 	void addQuestionTemplateToSurveyTemplate(final Long questionTemplateId,
 			final Long surveyTemplateId, final Long sequence)
 			throws SurveyServiceException;
+
+	/**
+	 * 
+	 * @param questionTemplateId
+	 * @param surveyTemplateId
+	 * @throws SurveyServiceException
+	 */
+	void removeQuestionTemplateFromSurveyTemplate(final Long questionTemplateId,
+			final Long surveyTemplateId) throws SurveyServiceException;
 
 }

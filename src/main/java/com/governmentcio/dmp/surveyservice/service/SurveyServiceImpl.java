@@ -7,6 +7,9 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
@@ -48,6 +51,9 @@ public class SurveyServiceImpl implements SurveyService {
 	@Autowired
 	SurveyTemplateQuestionTemplateRepository surveyTemplateQuestionTemplateRepository;
 
+	@PersistenceContext
+	EntityManager entityManager;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -55,6 +61,7 @@ public class SurveyServiceImpl implements SurveyService {
 	 * getSurveyTemplates()
 	 */
 	@Override
+	@Transactional
 	public Iterable<SurveyTemplate> getSurveyTemplates() {
 
 		Iterable<
@@ -72,6 +79,12 @@ public class SurveyServiceImpl implements SurveyService {
 		}
 
 		return surveyTemplates;
+	}
+
+	@Override
+	public Iterable<
+			SurveyTemplateQuestionTemplateDao> getSurveytemplateQuestiontemplateAssociations() {
+		return surveyTemplateQuestionTemplateRepository.findAll();
 	}
 
 	/*
@@ -113,6 +126,7 @@ public class SurveyServiceImpl implements SurveyService {
 	 * @return
 	 */
 	@Override
+	@Transactional
 	public SurveyTemplate getSurveyTemplateById(final Long id) {
 		return DomainFactory
 				.createSurveyTemplate(surveyTemplateRepository.findById(id).get());
@@ -125,6 +139,7 @@ public class SurveyServiceImpl implements SurveyService {
 	 * getSurveyTemplateByName(java.lang.String)
 	 */
 	@Override
+	@Transactional
 	public SurveyTemplate getSurveyTemplateByName(String name) {
 
 		if ((name == null) || (name.length() == 0)) {
@@ -298,6 +313,7 @@ public class SurveyServiceImpl implements SurveyService {
 	 * removeQuestionTemplate(java.lang.Long)
 	 */
 	@Override
+	@Transactional
 	public void removeQuestionTemplate(Long id) throws SurveyServiceException {
 
 		Optional<
@@ -320,6 +336,7 @@ public class SurveyServiceImpl implements SurveyService {
 	 * addQuestionTemplateToSurveyTemplate(java.lang.Long, java.lang.Long)
 	 */
 	@Override
+	@Transactional
 	public void addQuestionTemplateToSurveyTemplate(final Long questionTemplateId,
 			final Long surveyTemplateId, final Long sequence)
 			throws SurveyServiceException {
@@ -360,8 +377,80 @@ public class SurveyServiceImpl implements SurveyService {
 
 		questionTemplateDao.getSurveyTemplateQuestionTemplateDaos()
 				.add(surveyTemplateQuestionTemplateDao);
-		
+
 		questionTemplateRepository.save(questionTemplateDao);
 
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.governmentcio.dmp.surveyservice.service.SurveyService#
+	 * removeQuestionTemplateFromSurveyTemplate(java.lang.Long, java.lang.Long)
+	 */
+	@Override
+	@Transactional
+	public void removeQuestionTemplateFromSurveyTemplate(
+			final Long questionTemplateId, final Long surveyTemplateId)
+			throws SurveyServiceException {
+
+//		Query q = entityManager.createNativeQuery(
+//				"DELETE FROM surveytemplate_questiontemplate WHERE "
+//						+ "surveytemplate_ID =:surveyTemplateId and question_ID =:questionTemplateId",
+//				SurveyTemplateQuestionTemplateDao.class);
+//
+//		q.setParameter("surveyTemplateId", surveyTemplateId);
+//		q.setParameter("questionTemplateId", questionTemplateId);
+//
+//		int numberRowsDeleted = q.executeUpdate();
+//		LOG.debug("Deleted [" + numberRowsDeleted + "]");
+
+		Query q = entityManager.createNativeQuery(
+				"select id, surveytemplate_ID, question_ID from surveytemplate_questiontemplate "
+						+ "WHERE surveytemplate_ID =:surveyTemplateId and question_ID =:questionTemplateId",
+				SurveyTemplateQuestionTemplateDao.class);
+
+		q.setParameter("surveyTemplateId", surveyTemplateId);
+		q.setParameter("questionTemplateId", questionTemplateId);
+
+		SurveyTemplateQuestionTemplateDao surveyTemplateQuestionTemplateDao = (SurveyTemplateQuestionTemplateDao) q
+				.getSingleResult();
+
+		if (null != surveyTemplateQuestionTemplateDao) {
+
+			surveyTemplateQuestionTemplateRepository
+					.deleteById(surveyTemplateQuestionTemplateDao.getId());
+
+			Optional<
+					SurveyTemplateDao> surveyTemplateOptional = surveyTemplateRepository
+							.findById(surveyTemplateId);
+
+			if (!surveyTemplateOptional.isPresent()) {
+				throw new SurveyServiceException(
+						"Unable to find SurveyTemplate using id [" + surveyTemplateId
+								+ "]");
+			}
+
+			Optional<
+					QuestionTemplateDao> questionOptional = questionTemplateRepository
+							.findById(questionTemplateId);
+
+			if (!questionOptional.isPresent()) {
+				throw new SurveyServiceException(
+						"Unable to find QuestionTemplate using id [" + questionTemplateId
+								+ "]");
+			}
+
+			SurveyTemplateDao surveyTemplateDao = surveyTemplateOptional.get();
+
+			surveyTemplateDao.getSurveyTemplateQuestionTemplateDaos()
+					.remove(surveyTemplateQuestionTemplateDao);
+
+			surveyTemplateRepository.save(surveyTemplateDao);
+
+			QuestionTemplateDao questionTemplateDao = questionOptional.get();
+		}
+
+	}
+
 }
