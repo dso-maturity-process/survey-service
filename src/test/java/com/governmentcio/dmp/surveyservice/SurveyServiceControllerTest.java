@@ -393,7 +393,7 @@ class SurveyServiceControllerTest {
 
 		// Create a new question template
 
-		String text = "Test Question 101";
+		String text = "Test Question 110";
 		parameters = "?text=" + text;
 
 		ResponseEntity<QuestionTemplate> questionTemplateResponse = restTemplate
